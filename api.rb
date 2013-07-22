@@ -7,12 +7,13 @@ config = lightwaverf.get_config
 rooms = config['room']
 sequences = config['sequence']
 
-configure do
-  set :environment, :production
+before do
+  headers['Access-Control-Allow-Origin'] = '*'
+  headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
+  content_type :json
 end
 
 get '/room/?:room?' do
-  content_type :json
   if params['room']
     config['room'].each do | room |
       if room['name'] == params['room']
@@ -25,7 +26,6 @@ get '/room/?:room?' do
 end
 
 put '/room/:room/:device' do
-  content_type :json
   status = params['status'] || 'on'
   config['room'].each do | room |
     if room['name'] == params['room']
@@ -45,7 +45,6 @@ put '/room/:room/:device' do
 end
 
 get '/sequence/?:sequence?' do
-  content_type :json
   if params['sequence']
     if config['sequence'][ params['sequence'] ]
       return config['sequence'][ params['sequence'] ].to_json
@@ -56,7 +55,6 @@ get '/sequence/?:sequence?' do
 end
 
 put '/sequence/?:sequence?' do
-  content_type :json
   if config['sequence'][ params['sequence'] ]
     result = lightwaverf.sequence params['sequence'], true
     return { result: result }.to_json
@@ -64,7 +62,11 @@ put '/sequence/?:sequence?' do
   halt 404, { error: 'no such sequence', sequences: config['sequence'] }.to_json
 end
 
-get '/' do
-  content_type :json
+get '/config/?' do
+  config['url'] = 'http://' + request.host
+  config.to_json
+end
+
+options '/' do
   { GET: [ '/room', '/sequence' ] }.to_json
 end
