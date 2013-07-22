@@ -2,6 +2,8 @@
 require 'sinatra'
 require 'lightwaverf'
 
+Process.daemon
+
 lightwaverf = LightWaveRF.new
 config = lightwaverf.get_config
 rooms = config['room']
