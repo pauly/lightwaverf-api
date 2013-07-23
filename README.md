@@ -4,7 +4,7 @@ Simple API to communicate with LightwaveRF home automation hardware.
 
 Uses the lightwaverf gem, see https://github.com/pauly/lightwaverf
 
-# Setup
+## Setup
 
 Get a LightWaveRF wifi link http://amzn.to/V7yPPK and a remote socket http://amzn.to/RkukDo
 
