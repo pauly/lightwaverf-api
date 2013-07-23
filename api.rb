@@ -9,10 +9,19 @@ config = lightwaverf.get_config
 rooms = config['room']
 sequences = config['sequence']
 
+def authorised params
+  return params['key'] === 'foo' # obviously todo still...
+end
+
 before do
   headers['Access-Control-Allow-Origin'] = '*'
   headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
   content_type :json
+  if request.path_info != '/user'
+    if ! authorised( params )
+      halt 401, { error: 'not authorised, see paul' }.to_json
+    end
+  end
 end
 
 get '/room/?:room?' do
@@ -69,6 +78,11 @@ get '/config/?' do
   config.to_json
 end
 
+post '/user/?' do
+  key = SecureRandom.base64
+  { key: key }.to_json
+end
+
 options '/' do
-  { GET: [ '/room', '/sequence' ] }.to_json
+  { GET: [ '/room', '/sequence' ], POST: [ '/user' ] }.to_json
 end
