@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 require 'sinatra'
 require 'lightwaverf'
+require 'fileutils'
 
 Process.daemon
 
@@ -10,12 +11,13 @@ rooms = config['room']
 sequences = config['sequence']
 
 def authorised params
-  return params['key'] === 'foo' # obviously todo still...
+  # return File.exists?( '/home/pi/lightwaverf-api/config/keys/' + params['key'] )
+  return params['key']
 end
 
 before do
   headers['Access-Control-Allow-Origin'] = '*'
-  headers['Access-Control-Allow-Methods'] = 'GET, PUT, OPTIONS'
+  headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, OPTIONS'
   content_type :json
   if request.path_info != '/user'
     if ! authorised( params )
@@ -80,9 +82,12 @@ end
 
 post '/user/?' do
   key = SecureRandom.base64
+  File.open( '/home/pi/lightwaverf-api/config/keys/' + key + '.pending', 'w' ) do | handle |
+    handle.write JSON.pretty_generate( params )
+  end
   { key: key }.to_json
 end
 
-options '/' do
+options '**' do
   { GET: [ '/room', '/sequence' ], POST: [ '/user' ] }.to_json
 end
