@@ -88,6 +88,10 @@ post '/user/?' do
   { key: key }.to_json
 end
 
+get '/energy/?' do
+  return lightwaverf.energy.to_json
+end
+
 options '**' do
   { GET: [ '/room', '/sequence' ], POST: [ '/user' ] }.to_json
 end
