@@ -25,7 +25,7 @@
 # see https://github.com/pauly/lightwaverf-api
 
 ROOT_DIR="/home/pi/lightwaverf-api"
-SERVER="$ROOT_DIR/api.rb"
+SERVER="$ROOT_DIR/lightwaverf-api.rb"
 LOG_FILE="$ROOT_DIR/api.log"
 CONFIG_FILE="$ROOT_DIR/config/default.sh"
 LIGHTWAVERF_API_PORT=80
@@ -40,7 +40,7 @@ do_start() {
     else
       echo "config file $CONFIG_FILE is missing..."
     fi
-    $SERVER -p $LIGHTWAVERF_API_PORT -e production > $LOG_FILE 2>&1 &
+    $SERVER -p $LIGHTWAVERF_API_PORT -e production > $LOG_FILE 2>&1
     RETVAL=$?
     # echo
     # [ $RETVAL -eq 0 ] && touch $LOCK_FILE
