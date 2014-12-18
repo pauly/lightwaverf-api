@@ -27,13 +27,11 @@ and restart your machine. On reboot the api will be running on port 80 on this m
     GET http://localhost/sequence/foo # lists devices controlled in sequence "foo"
     Put http://localhost/sequence/foo # execute sequence "foo"
 
-This code is unofficial and unaffiliated with http://www.lightwaverf.com, please let me know how you get on http://www.clarkeology.com/wiki/lightwaverf / @pauly
+This code is unofficial and unaffiliated with http://www.lightwaverf.com, please let me know how you get on http://www.clarkeology.com/project/lightwaverf / @pauly
 
 ## Todo
 
  * Package it
  * Make it configurable
- * Add a page that controls the api into the api
- * Make a real phone app
  * ???
- * Proft
+ * Profit
