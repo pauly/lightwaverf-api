@@ -38,7 +38,7 @@ do_start() {
     if [ -f "$CONFIG_FILE" ] ; then
       . $CONFIG_FILE
     else
-      echo "config file $CONFIG_FILE is missing..."
+      echo "OPTIONAL config file $CONFIG_FILE is missing, no matter..."
     fi
     $SERVER -p $LIGHTWAVERF_API_PORT -e production > $LOG_FILE 2>&1
     RETVAL=$?
