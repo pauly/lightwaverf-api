@@ -35,3 +35,7 @@ This code is unofficial and unaffiliated with http://www.lightwaverf.com, please
  * Make it configurable
  * ???
  * Profit
+
+## Gotcha
+
+ * Hmm raspberry pi might require `sudo apt-get install libmagickcore-dev libmagickwand-dev` now

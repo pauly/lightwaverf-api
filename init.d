@@ -40,7 +40,7 @@ do_start() {
     else
       echo "OPTIONAL config file $CONFIG_FILE is missing, no matter..."
     fi
-    $SERVER -p $LIGHTWAVERF_API_PORT -e production > $LOG_FILE 2>&1
+    $SERVER -p $LIGHTWAVERF_API_PORT -o 0.0.0.0 -e production > $LOG_FILE 2>&1
     RETVAL=$?
     # echo
     # [ $RETVAL -eq 0 ] && touch $LOCK_FILE
