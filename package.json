@@ -1,0 +1,32 @@
+{
+  "name": "lightwaverf-api",
+  "version": "1.0.0",
+  "description": "Simple API to communicate with LightwaveRF home automation hardware.",
+  "main": "src/server",
+  "scripts": {
+    "start": "nodemon --config ./nodemon.json --watch . src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pauly/lightwaverf-api.git"
+  },
+  "keywords": [
+    "lightwaverf"
+  ],
+  "author": "Paul Clarke <pauly@clarkeology.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pauly/lightwaverf-api/issues"
+  },
+  "homepage": "https://github.com/pauly/lightwaverf-api#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "uuid": "^3.3.2",
+    "yml": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.9"
+  }
+}
