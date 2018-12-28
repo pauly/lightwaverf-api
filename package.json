@@ -21,9 +21,16 @@
   },
   "homepage": "https://github.com/pauly/lightwaverf-api#readme",
   "dependencies": {
+    "async": "^2.6.1",
     "body-parser": "^1.18.3",
+    "dgram": "^1.0.1",
     "express": "^4.16.4",
+    "ical2json": "^1.2.0",
+    "request": "^2.88.0",
+    "require": "^2.4.20",
+    "require-all": "^3.0.0",
     "uuid": "^3.3.2",
+    "winston": "^3.1.0",
     "yml": "^1.0.0"
   },
   "devDependencies": {

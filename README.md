@@ -4,16 +4,13 @@ Simple API to communicate with LightwaveRF home automation hardware.
 
 This used to be all in ruby, there is still a ruby branch in this repo of the original code. Now it's all javascript.
 
-Uses the lightwaverf gem, see https://github.com/pauly/lightwaverf
-
-Todo: rewrite that in javascript too.
+This doesn't even use [the lightwaverf gem](https://github.com/pauly/lightwaverf) any more, but it does share the same format of config file, so you might want that to set up your config initially.
 
 ## Setup
 
 Get a LightWaveRF wifi link http://amzn.to/V7yPPK and a remote socket http://amzn.to/RkukDo
 
-Run this code on a machine on your local network, install ruby and the lightwaverf gem,
-add this to your crontab:
+Run this code on a machine on your local network, add this to your crontab:
 ```
 @reboot bash -l -c 'cd /home/pi/lightwaverf-api && npm start' > /tmp/lightwaverf-api.out 2>&1
 ```

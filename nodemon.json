@@ -1,5 +1,10 @@
 {
   "signal": "SIGTERM",
+  "ext": "js,jsx,json",
+  "ignore": [
+    "scripts/*",
+    "test/*"
+  ],
   "events": {
     "crash": "touch src/server.js"
   },
