@@ -3,9 +3,15 @@
   "version": "1.0.0",
   "description": "Simple API to communicate with LightwaveRF home automation hardware.",
   "main": "src/server",
+  "bin": {
+    "lightwaverf": "node ./scripts/operate.js"
+  },
   "scripts": {
     "start": "nodemon --config ./nodemon.json --watch . src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "config": {
+    "port": 8000
   },
   "repository": {
     "type": "git",
@@ -25,7 +31,7 @@
     "body-parser": "^1.18.3",
     "dgram": "^1.0.1",
     "express": "^4.16.4",
-    "ical2json": "^1.2.0",
+    "ical-expander": "2.0.0",
     "request": "^2.88.0",
     "require": "^2.4.20",
     "require-all": "^3.0.0",

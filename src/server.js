@@ -1,3 +1,4 @@
+const { port } = require('../package').config
 const express = require('express')
 const fs = require('fs')
 const path = require('path')
@@ -30,7 +31,8 @@ const logger = winston.createLogger({
 })
 
 const log = function (type, path, data) {
-  console.log((new Date()).toISOString(), type, path, JSON.stringify(data))
+  if (typeof data !=== 'string') data = JSON.stringify(data)
+  console.log((new Date()).toISOString(), type, path, data)
 }
 
 server.on('message', function (msg) {
@@ -65,7 +67,7 @@ server.on('message', function (msg) {
 const send = function (cmd, callback) {
   const id = '' + messageId++
   const message = Buffer.from(id + ',' + cmd, 'ascii')
-  log('➡️', '', { cmd, message: '' + message })
+  log('➡️', '', '' + message)
   client.send(message, 0, message.length, 9760, config.host || '255.255.255.255')
   if (callback) listeners[id] = callback
 }
@@ -87,13 +89,16 @@ exec(`mkdir -p ${keyPath}`, function (error, stderr) {
 })
 
 const authorised = function (key, callback) {
+  if (!key) return callback('missing key')
   return fs.access(path.join(keyPath, key), fs.F_OK, callback)
 }
 
 const accesslog = function (req, res, next) {
-  const { key, _, ...query } = req.query
-  if (req.method !== 'OPTIONS') log(req.method, req.path, query)
   next()
+  const { key, _, ...query } = req.query
+  if (req.method === 'OPTIONS') return // not interesting logging
+  if (req.path === '/favicon.ico') return // not interesting logging
+  log(req.method, req.path, query)
 }
 
 const auth = function (req, res, next) {
@@ -215,4 +220,4 @@ app.all('*', (req, res) => {
   res.json({ GET: ['/room', '/sequence', '/energy'], POST: ['/user'] })
 })
 
-app.listen(8000)
+app.listen(port)

@@ -1,6 +1,6 @@
 {
   "signal": "SIGTERM",
-  "ext": "js,jsx,json",
+  "ext": "js,jsx,json,yml",
   "ignore": [
     "scripts/*",
     "test/*"

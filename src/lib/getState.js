@@ -1,4 +1,1 @@
-module.exports = (state, event) => {
-  if (event.state) state = state
-  return state
-}
+module.exports = (state, event) => event.state || state
