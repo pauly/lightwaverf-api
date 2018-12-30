@@ -31,7 +31,7 @@ const logger = winston.createLogger({
 })
 
 const log = function (type, path, data) {
-  if (typeof data !=== 'string') data = JSON.stringify(data)
+  if (typeof data !== 'string') data = JSON.stringify(data)
   console.log((new Date()).toISOString(), type, path, data)
 }
 
