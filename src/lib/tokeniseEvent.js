@@ -27,7 +27,7 @@ module.exports = e => {
     event.date.setMinutes(event.date.getMinutes() + Math.random() * variance * 2 - variance)
     event.end.setMinutes(event.end.getMinutes() + Math.random() * variance * 2 - variance)
   }
-  if (/([+\-]\d+)(h?)/.test(event.summary)) {
+  if (/([+-]\d+)(h?)/.test(event.summary)) {
     let modifier = RegExp.$1 / 1
     if (RegExp.$2 === 'h') {
       modifier *= 60 // (so always in minutes)
@@ -36,12 +36,14 @@ module.exports = e => {
     event.end.setMinutes(event.end.getMinutes() + modifier)
   }
   // if it starts with a hash it is a state
-  if (/^\#/.test(event.summary)) {
+  if (/^#/.test(event.summary)) {
     event.state = event.command.shift().substr(1)
   } else if (/^mood\W/.test(event.summary)) {
-    event.type = event.command.shift()
+    event.command.shift()
+    event.mood = event.command.shift()
     event.room = event.command.shift()
   } else if (/^sequence\W/.test(event.summary)) {
+    event.command.shift()
     event.sequence = event.command.shift()
   } else {
     event.room = event.command.shift()

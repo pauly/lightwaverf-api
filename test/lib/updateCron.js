@@ -1,12 +1,10 @@
-const { name } = require('../../package')
 const childProcess = require('child_process')
-const { basename } = require('path')
 const fs = require('fs')
-const tempFolder = '/tmp'
+const updateCron = require('../../src/lib/updateCron')
 
-module.exports = (newEntries, callback) => {
+/* module.exports = (newEntries, callback) => {
   const id = `${name}-${basename(__filename, '.js').replace(/\W+/g, '-')}`
-  childProcess.exec(`crontab -l`, (err, crontab) => {
+  exec(`crontab -l`, (err, crontab) => {
     if (err) return callback(err)
     crontab = ('' + crontab).split('\n')
     const tempFileBase = `${tempFolder}/${id}`
@@ -17,12 +15,34 @@ module.exports = (newEntries, callback) => {
     crontab = crontab.filter(line => !regex.test(line))
       .concat(newEntries)
     const tempFile = `${tempFileBase}.tmp`
-    fs.writeFile(tempFile, crontab.join('\n'), err => {
+    writeFile(tempFile, crontab.join('\n'), err => {
       if (err) return callback(new Error(`🙀 failed to write temporary file ${tempFile} (${err})`))
-      childProcess.exec(`crontab ${tempFile}`, err => {
+      exec(`crontab ${tempFile}`, err => {
         if (err) return callback(new Error(`🙀 failed to set new cron (${err})`))
         callback(null)
       })
     })
   })
-}
+} */
+describe('updateCron', () => {
+  let callback = null
+
+  beforeEach(() => {
+    callback = sandbox.stub()
+    sandbox.stub(childProcess, 'exec').yields(null, 'CRON')
+    sandbox.stub(fs, 'writeFile').yields(null)
+  })
+
+  afterEach(() => sandbox.restore())
+
+  describe('with previous matching entries', () => {
+    beforeEach(() => {
+      updateCron('#new\n#entries', callback)
+    })
+
+    it('does something', () => {
+      expect(callback).to.have.been.calledOnce()
+        .and.calledWithExactly(null)
+    })
+  })
+})

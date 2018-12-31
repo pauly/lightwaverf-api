@@ -4,7 +4,17 @@ const icalDayToZeroIndex = require('./icalDayToZeroIndex')
 const executable = relative(process.env.HOME, resolve(__dirname, '..', '..', 'scripts', 'operate.js'))
 const schedule = relative(process.env.HOME, resolve(__dirname, '..', '..', 'scripts', 'schedule.js'))
 
-module.exports = (state, cron, event) => {
+// helper so I don't have to add the boilerplate each time
+// addBoilerplate([foo, bar]) === `foo bash -etc 'bar' > /tmp/bar.out 2&! # comment`
+const addBoilerplate = frequenceAndCommand => {
+  const [frequency, rest] = frequenceAndCommand
+  if (!rest) return `# ${frequency}`
+  const [command, comment] = rest.split('#')
+  const tempFile = command.replace(executable, '').trim().replace(/\W+/g, '-')
+  return `${frequency} bash -l -c '${command}' > /tmp/${tempFile}.out 2>&1 ${comment ? '# ' + comment : ''}`
+}
+
+module.exports = state => (cron, event) => {
   if (event.state) return cron // this is the state, not a real event
   if (!forState(state)(event)) return cron
   const pairs = []
@@ -15,6 +25,7 @@ module.exports = (state, cron, event) => {
   let date = '*'
   let month = '*'
   let day = '*'
+  // @todo non repeating events (don't think I have any)
   if (event.rrule.freq === 'WEEKLY') {
     if (event.rrule.byday) {
       if (!Array.isArray(event.rrule.byday)) {
@@ -35,12 +46,5 @@ module.exports = (state, cron, event) => {
   } else {
     pairs.push([`# @todo ${JSON.stringify(event)}`])
   }
-  const toCron = frequenceAndCommand => {
-    const [frequency, rest] = frequenceAndCommand
-    if (!rest) return `# ${frequency}`
-    const [command, comment] = rest.split('#')
-    const tempFile = command.replace(executable, '').trim().replace(/\W+/g, '-')
-    return `${frequency} bash -l -c '${command}' > /tmp/${tempFile}.out 2>&1 ${comment ? '# ' + comment : ''}`
-  }
-  return cron.concat(pairs.map(toCron))
+  return cron.concat(pairs.map(addBoilerplate))
 }

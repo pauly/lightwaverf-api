@@ -1,1 +1,1 @@
-  module.exports = day => 'SUMOTUWETHFRSA'.indexOf(day) / 2
+module.exports = day => 'SUMOTUWETHFRSA'.indexOf(day) / 2

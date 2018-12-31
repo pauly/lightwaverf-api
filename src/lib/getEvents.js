@@ -1,4 +1,3 @@
-const { convert } = require('ical2json')
 const IcalExpander = require('ical-expander')
 const { get } = require('request')
 const { writeFile } = require('fs')
@@ -13,6 +12,7 @@ const map = e => {
   }
 }
 
+// 👇 this is the real deal but I'm using fake data while developing
 module.exports = (calendar, callback) => {
   get(calendar, (err, response, ics) => {
     if (err) return callback(err)
@@ -27,7 +27,9 @@ module.exports = (calendar, callback) => {
     callback(null, allEvents)
     const file = join(__dirname, '../../events.json')
     const content = JSON.stringify(allEvents, null, 2)
-    writeFile(file, content, error => console.error)
+    writeFile(file, content, err => {
+      if (err) console.error(err)
+    })
   })
 }
 

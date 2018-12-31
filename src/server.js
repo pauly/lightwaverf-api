@@ -11,6 +11,7 @@ const server = dgram.createSocket('udp4')
 const client = dgram.createSocket('udp4')
 const winston = require('winston')
 const { waterfall } = require('async')
+const { convertStatus } = require('./lib')
 const filename = path.resolve(process.env.HOME, 'lightwaverf.log')
 const level = 'info'
 const listeners = {}
@@ -57,7 +58,7 @@ server.on('message', function (msg) {
       usage = msg.cUse
       today = msg.todUse
       max = msg.trans
-      logger.log({ level, message: { usage, max, today }, timestamp})
+      logger.log({ level, message: { usage, max, today }, timestamp })
       return
     }
   }
@@ -89,7 +90,7 @@ exec(`mkdir -p ${keyPath}`, function (error, stderr) {
 })
 
 const authorised = function (key, callback) {
-  if (!key) return callback('missing key')
+  if (!key) return callback(new Error('missing key'))
   return fs.access(path.join(keyPath, key), fs.F_OK, callback)
 }
 
@@ -131,13 +132,13 @@ const operate = function (roomName, deviceName, status, callback) {
   status = ('' + (status || 'on')).replace(/\W/g, '')
   const rooms = config.room
   const room = rooms.find(room => room.name === roomName)
-  if (!room) return callback('no such room')
+  if (!room) return callback(new Error('no such room'))
   const r = rooms.findIndex(room => room.name === roomName) + 1
   const device = room.device.find(device => device.name === deviceName)
-  if (!device) return callback('no such device')
+  if (!device) return callback(new Error('no such device'))
   const d = room.device.findIndex(device => device.name === deviceName) + 1
-  const f = status === 'on' ? 1 : 0
-  code = '!R' + r + 'D' + d + 'F' + f + '|' + room.name + ' ' + device.name + '|' + status + ' via @pauly'
+  const f = convertStatus(status)
+  const code = '!R' + r + 'D' + d + f + '|' + room.name + ' ' + device.name + '|' + status + ' via @pauly'
   send(code, callback)
 }
 
@@ -183,8 +184,8 @@ app.put('/sequence/:sequence', (req, res) => {
       })
     }
   })
-  waterfall(tasks, (error, response) => {
-    // log('🤔', '', { error, response })
+  waterfall(tasks, error => {
+    if (error) log('🤔', '', { error })
   })
 })
 
@@ -206,6 +207,7 @@ app.post('/user', urlencodedParser, (req, res) => {
   const key = uuid.v4()
   const content = JSON.stringify(req.body)
   fs.readdir(keyPath, (error, files) => {
+    if (error) return res.status(500).json({ error })
     // if we are the first key to be created, you get it free!
     // else create a . file that someone has to authorise
     const file = files.length === 0 ? key : '.' + key

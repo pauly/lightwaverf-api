@@ -7,8 +7,10 @@
     "lightwaverf": "node ./scripts/operate.js"
   },
   "scripts": {
+    "coverage": "nyc mocha && nyc check-coverage",
+    "lint": "eslint . --quiet && echo '✔ All good!'",
     "start": "nodemon --config ./nodemon.json --watch . src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run lint && npm run coverage"
   },
   "config": {
     "port": 8000
@@ -40,6 +42,26 @@
     "yml": "^1.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.18.9"
+    "babel-core": "6.26.3",
+    "babel-preset-env": "1.7.0",
+    "babel-preset-react": "6.24.1",
+    "babel-preset-stage-0": "6.24.1",
+    "chai": "4.2.0",
+    "chai-as-promised": "7.1.1",
+    "dirty-chai": "2.0.1",
+    "eslint": "5.10.0",
+    "eslint-config-standard": "12.0.0",
+    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-mocha": "5.2.0",
+    "eslint-plugin-node": "8.0.0",
+    "eslint-plugin-promise": "4.0.1",
+    "eslint-plugin-standard": "4.0.0",
+    "event-stream": "4.0.1",
+    "line-by-line": "0.1.6",
+    "mocha": "5.1.1",
+    "nodemon": "1.18.9",
+    "nyc": "13.1.0",
+    "sinon": "7.2.2",
+    "sinon-chai": "3.3.0"
   }
 }
