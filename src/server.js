@@ -9,11 +9,8 @@ const bodyParser = require('body-parser')
 const dgram = require('dgram')
 const server = dgram.createSocket('udp4')
 const client = dgram.createSocket('udp4')
-const winston = require('winston')
 const { waterfall } = require('async')
-const { convertStatus } = require('./lib')
-const filename = path.resolve(process.env.HOME, 'lightwaverf.log')
-const level = 'info'
+const { convertStatus, logger } = require('./lib')
 const listeners = {}
 let messageId = 0
 let usage = 0
@@ -22,14 +19,6 @@ let max = 0
 
 const { sequence, room, host } = load(path.resolve(process.env.HOME, 'lightwaverf-config.yml')) || {}
 const config = { sequence, room, host }
-
-const logger = winston.createLogger({
-  level,
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.File({ filename })
-  ]
-})
 
 const log = function (type, path, data) {
   if (typeof data !== 'string') data = JSON.stringify(data)
@@ -58,7 +47,7 @@ server.on('message', function (msg) {
       usage = msg.cUse
       today = msg.todUse
       max = msg.trans
-      logger.log({ level, message: { usage, max, today }, timestamp })
+      logger.log({ level: 'info', message: { usage, max, today }, timestamp })
       return
     }
   }

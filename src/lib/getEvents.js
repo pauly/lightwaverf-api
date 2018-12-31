@@ -1,8 +1,8 @@
 const IcalExpander = require('ical-expander')
-const { get } = require('request')
+const request = require('request')
+const sinon = require('sinon') // @todo only temporary!
 const { writeFile } = require('fs')
 const { join } = require('path')
-const testEvents = require('../../events')
 const maxIterations = 0
 
 const map = e => {
@@ -14,25 +14,33 @@ const map = e => {
 
 // 👇 this is the real deal but I'm using fake data while developing
 module.exports = (calendar, callback) => {
-  get(calendar, (err, response, ics) => {
+  const testData = require(join(__dirname, '../../basic.ics'))
+  sinon.stub(request, 'get').yields(null, null, testData)
+  request.get(calendar, (err, response, ics) => {
+    console.log(calendar, 'got', err, typeof ics)
+    request.get.restore && request.get.restore()
     if (err) return callback(err)
     const icalExpander = new IcalExpander({ ics, maxIterations })
     const from = new Date()
     const to = new Date()
     to.setDate(to.getDate() + 1)
+    console.log(from, to)
     const events = icalExpander.between(from, to)
+    let file = join(__dirname, '../../raw.json')
+    let content = JSON.stringify(events, null, 2)
+    writeFile(file, content, err => {
+      if (err) console.error(err)
+    })
     const mappedEvents = events.events.map(map)
+    console.log(mappedEvents.length, 'events')
     const mappedOccurrences = events.occurrences.map(map)
+    console.log(mappedOccurrences.length, 'occurences')
     const allEvents = [].concat(mappedEvents, mappedOccurrences)
     callback(null, allEvents)
-    const file = join(__dirname, '../../events.json')
-    const content = JSON.stringify(allEvents, null, 2)
+    file = join(__dirname, '../../events.json')
+    content = JSON.stringify(allEvents, null, 2)
     writeFile(file, content, err => {
       if (err) console.error(err)
     })
   })
-}
-
-module.exports = (calendar, callback) => {
-  callback(null, testEvents) // .slice(0, 10))
 }

@@ -6,7 +6,7 @@ const { eventToCron, getEvents, getState, tokeniseEvent, updateCron } = require(
 const { calendar } = load(resolve(process.env.HOME, 'lightwaverf-config.yml')) || {}
 
 getEvents(calendar, (err, allEvents) => {
-  if (err) return console.error(err)
+  if (err || !allEvents) return console.error(err || 'no events')
   const events = allEvents.map(tokeniseEvent)
   const state = events.reduce(getState, null)
   const cron = events.reduce(eventToCron(state), [])

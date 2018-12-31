@@ -3,14 +3,16 @@ module.exports = e => {
   event.summary = e.summary
   event.command = ('' + e.summary).split(/ +/)
   event.annotate = !/do not annotate/.test(event.summary)
+  const component = e.component.jCal || e.component
   try {
-    event.date = new Date(e.component[1][0][3])
-    event.end = new Date(e.component[1][1][3])
-    event.rrule = e.component[1][2][3]
+    event.date = new Date(component[1][0][3])
+    event.end = new Date(component[1][1][3])
+    event.rrule = component[1][2][3]
   } catch (err) {
-    console.warn('problem with component', e.component)
+    console.warn('problem with jCal', e.summary, err, component)
     event.date = new Date()
     event.end = new Date()
+    event.state = 'never'
     event.rrule = {}
   }
   let match // undefined
