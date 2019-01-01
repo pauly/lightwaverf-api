@@ -1,18 +1,7 @@
-const { relative, resolve } = require('path')
 const forState = require('./forState')
 const icalDayToZeroIndex = require('./icalDayToZeroIndex')
-const executable = relative(process.env.HOME, resolve(__dirname, '..', '..', 'scripts', 'operate.js'))
-const schedule = relative(process.env.HOME, resolve(__dirname, '..', '..', 'scripts', 'schedule.js'))
-
-// helper so I don't have to add the boilerplate each time
-// addBoilerplate([foo, bar]) === `foo bash -etc 'bar' > /tmp/bar.out 2&! # comment`
-const addBoilerplate = frequenceAndCommand => {
-  const [frequency, rest] = frequenceAndCommand
-  if (!rest) return `# ${frequency}`
-  const [command, comment] = rest.split('#')
-  const tempFile = command.replace(executable, '').trim().replace(/\W+/g, '-')
-  return `${frequency} bash -l -c '${command}' > /tmp/${tempFile}.out 2>&1 ${comment ? '# ' + comment : ''}`
-}
+const cronBoilerPlate = require('./cronBoilerPlate')
+const { executable, schedule } = require('../../config')
 
 module.exports = state => (cron, event) => {
   if (event.state) return cron // this is the state, not a real event
@@ -20,7 +9,7 @@ module.exports = state => (cron, event) => {
   const pairs = []
   if (!cron.length) { // first time round
     if (state) cron.push(`# state #${state} so not including all events`)
-    pairs.push([`0 4 * * *`, `${schedule} # and auto schedule the schedule`])
+    pairs.push([`0 4 * * *`, `NODE_ENV=production ${schedule} # and auto schedule the schedule`])
   }
   let date = '*'
   let month = '*'
@@ -46,5 +35,5 @@ module.exports = state => (cron, event) => {
   } else {
     pairs.push([`# @todo ${JSON.stringify(event)}`])
   }
-  return cron.concat(pairs.map(addBoilerplate))
+  return cron.concat(pairs.map(cronBoilerPlate))
 }
