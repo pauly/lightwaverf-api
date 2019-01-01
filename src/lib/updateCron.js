@@ -17,7 +17,7 @@ module.exports = (newEntries, callback) => {
     crontab = crontab.filter(line => !regex.test(line))
       .concat(newEntries)
     const tempFile = `${tempFileBase}.tmp`
-    fs.writeFile(tempFile, crontab.join('\n'), err => {
+    fs.writeFile(tempFile, crontab.join('\n') + '\n', err => {
       if (err) return callback(new Error(`🙀 failed to write temporary file ${tempFile} (${err})`))
       childProcess.exec(`crontab ${tempFile}`, err => {
         if (err) return callback(new Error(`🙀 failed to set new cron (${err})`))
