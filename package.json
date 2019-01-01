@@ -35,11 +35,10 @@
     "express": "^4.16.4",
     "ical-expander": "2.0.0",
     "request": "^2.88.0",
-    "require": "^2.4.20",
     "require-all": "^3.0.0",
     "uuid": "^3.3.2",
     "winston": "^3.1.0",
-    "yml": "^1.0.0"
+    "yaml": "1.2.0"
   },
   "devDependencies": {
     "babel-core": "6.26.3",

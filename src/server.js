@@ -3,7 +3,7 @@ const express = require('express')
 const fs = require('fs')
 const path = require('path')
 const { exec } = require('child_process')
-const { load } = require('yml')
+const { parse } = require('yaml')
 const uuid = require('uuid')
 const bodyParser = require('body-parser')
 const dgram = require('dgram')
@@ -17,7 +17,7 @@ let usage = 0
 let today = 0
 let max = 0
 
-const { sequence, room, host } = load(path.resolve(process.env.HOME, 'lightwaverf-config.yml')) || {}
+const { sequence, room, host } = parse(fs.readFileSync(path.resolve(process.env.HOME, 'lightwaverf-config.yml'), 'utf8'))
 const config = { sequence, room, host }
 
 const log = function (type, path, data) {
