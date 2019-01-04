@@ -8,6 +8,8 @@ const uuid = require('uuid')
 const bodyParser = require('body-parser')
 const dgram = require('dgram')
 const server = dgram.createSocket('udp4')
+const server2 = dgram.createSocket('udp4')
+const server3 = dgram.createSocket('udp4')
 const client = dgram.createSocket('udp4')
 const { waterfall } = require('async')
 const { convertStatus, logger } = require('./lib')
@@ -54,6 +56,31 @@ server.on('message', function (msg) {
   log('⬅️', '', msg)
 })
 
+server.on('listening', function () {
+  const address = server.address()
+  log('☀️', '', address)
+})
+
+server.bind(9761)
+server2.bind(9760)
+server3.bind(4101)
+
+server2.on('listening', function () {
+  const address = server.address()
+  log('2️⃣', '', address)
+})
+server2.on('message', function (msg) {
+  log('2️⃣', '', msg)
+})
+
+server3.on('listening', function () {
+  const address = server.address()
+  log('3️⃣', '', address)
+})
+server3.on('message', function (msg) {
+  log('3️⃣', '', msg)
+})
+
 const send = function (cmd, callback) {
   const id = '' + messageId++
   const message = Buffer.from(id + ',' + cmd, 'ascii')
@@ -62,11 +89,6 @@ const send = function (cmd, callback) {
   if (callback) listeners[id] = callback
 }
 
-server.on('listening', function () {
-  const address = server.address()
-  log('☀️', '', address)
-})
-server.bind(9761)
 // send('!R1Fa') // register / firmware
 
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
@@ -127,7 +149,7 @@ const operate = function (roomName, deviceName, status, callback) {
   if (!device) return callback(new Error('no such device'))
   const d = room.device.findIndex(device => device.name === deviceName) + 1
   const f = convertStatus(status)
-  const code = '!R' + r + 'D' + d + f + '|' + room.name + ' ' + device.name + '|' + status + ' via @pauly'
+  const code = '!R' + r + 'D' + d + f // + '|' + room.name + ' ' + device.name + '|' + status + ' via @pauly'
   send(code, callback)
 }
 
