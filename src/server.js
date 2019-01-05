@@ -40,6 +40,7 @@ server.on('message', function (msg) {
     }
     if (callback) callback(error, response)
     delete listeners[id]
+    log('👍', '', error || response)
     return
   }
   if (/^\*!({.*})/.exec(msg)) {
@@ -51,6 +52,11 @@ server.on('message', function (msg) {
       max = msg.trans
       logger.log({ level: 'info', message: { usage, max, today }, timestamp })
       return
+    }
+    if (msg.type === 'hub') {
+      // {"trans":13,"mac":"03:0F:DA","time":1546674990,"pkt":"system","fn":"hubCall","type":"hub","prod":"wfl","fw":"U2.94D","uptime":39667,"timeZone":0,"lat":52.48,"long":-1.89,"tmrs":0,"evns":0,"run":0,"macs":0,"ip":"192.168.1.1","devs":0}
+      config.host = msg.ip
+      log('💾', '', config)
     }
   }
   log('⬅️', '', msg)
@@ -152,6 +158,13 @@ const operate = function (roomName, deviceName, status, callback) {
   const code = '!R' + r + 'D' + d + f // + '|' + room.name + ' ' + device.name + '|' + status + ' via @pauly'
   send(code, callback)
 }
+
+app.put('/register', function (req, res) {
+  send('!F*p', function (error, result) {
+    if (error) return res.status(400).json({ error })
+    res.json({ result })
+  })
+})
 
 app.put('/room/:room/:device', function (req, res) {
   operate(req.params.room, req.params.device, req.query.status, function (error, result) {
