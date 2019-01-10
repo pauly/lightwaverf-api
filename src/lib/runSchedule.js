@@ -1,6 +1,6 @@
 const { resolve } = require('path')
 const { readFileSync } = require('fs')
-const { parse, stringify } = require('yaml')
+const { parse } = require('yaml')
 
 const eventToCron = require('./eventToCron')
 const getEvents = require('./getEvents')

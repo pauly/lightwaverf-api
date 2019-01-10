@@ -1,7 +1,6 @@
 const IcalExpander = require('ical-expander')
 const request = require('request')
 const sinon = require('sinon') // @todo only temporary!
-const { writeFile } = require('fs')
 const { join } = require('path')
 const maxIterations = 0
 

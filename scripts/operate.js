@@ -9,6 +9,7 @@ const keyPath = resolve(__dirname, '..', 'config', 'keys')
 const args = process.argv.slice(2)
 let status = 'on'
 switch (args[0]) {
+  case 'mood':
   case 'register':
   case 'energy':
   case 'sequence':

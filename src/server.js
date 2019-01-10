@@ -1,31 +1,32 @@
 const { port } = require('../package').config
 const express = require('express')
-const fs = require('fs')
-const path = require('path')
+const { readdir, readFileSync, writeFile } = require('fs')
+const { join, resolve } = require('path')
 const { exec } = require('child_process')
-const { parse } = require('yaml')
+const { parse, stringify } = require('yaml')
 const uuid = require('uuid')
-const bodyParser = require('body-parser')
 const dgram = require('dgram')
 const server = dgram.createSocket('udp4')
-const server2 = dgram.createSocket('udp4')
-const server3 = dgram.createSocket('udp4')
 const client = dgram.createSocket('udp4')
 const { waterfall } = require('async')
-const { convertStatus, logger } = require('./lib')
+const { accesslog, authorised, convertStatus, log, logger, setHeaders, urlencodedParser } = require('./lib')
 const listeners = {}
-let messageId = 0
 let usage = 0
 let today = 0
 let max = 0
+let messageId = 0
 
-const { sequence, room, host } = parse(fs.readFileSync(path.resolve(process.env.HOME, 'lightwaverf-config.yml'), 'utf8'))
-const config = { sequence, room, host }
-
-const log = function (type, path, data) {
-  if (typeof data !== 'string') data = JSON.stringify(data)
-  console.log((new Date()).toISOString(), type, path, data)
+const send = (cmd, callback, backoff) => {
+  const id = '' + messageId++
+  const message = Buffer.from(id + ',' + cmd, 'ascii')
+  log('➡️', '', '' + message)
+  client.send(message, 0, message.length, 9760, host || '255.255.255.255')
+  if (callback) listeners[id] = { cmd, callback, backoff }
 }
+
+const configFile = resolve(process.env.HOME, 'lightwaverf-config.yml')
+const { sequence, room, host } = parse(readFileSync(configFile, 'utf8'))
+const config = { sequence, room, host }
 
 server.on('message', function (msg) {
   const regex = /^(\d+),(.+)/
@@ -33,14 +34,25 @@ server.on('message', function (msg) {
     const id = '' + RegExp.$1
     let response = RegExp.$2
     let error = null
-    const callback = listeners[id]
     if (/^err/i.test(response)) {
       error = response
       response = null
     }
-    if (callback) callback(error, response)
+    const listener = listeners[id] || {}
+    const callback = listener.callback
+    if (callback) {
+      if (/^err,6/i.test(error)) {
+        const backoff = (listener.backoff || 0) + 200
+        const cmd = listener.cmd
+        setTimeout(() => {
+          send(cmd, callback, backoff)
+        }, backoff)
+      } else {
+        callback(error, response)
+      }
+    }
     delete listeners[id]
-    log('👍', '', error || response)
+    log(error ? '👎' : '👍', '', error || response)
     return
   }
   if (/^\*!({.*})/.exec(msg)) {
@@ -54,9 +66,13 @@ server.on('message', function (msg) {
       return
     }
     if (msg.type === 'hub') {
-      // {"trans":13,"mac":"03:0F:DA","time":1546674990,"pkt":"system","fn":"hubCall","type":"hub","prod":"wfl","fw":"U2.94D","uptime":39667,"timeZone":0,"lat":52.48,"long":-1.89,"tmrs":0,"evns":0,"run":0,"macs":0,"ip":"192.168.1.1","devs":0}
+      if (config.host === msg.ip) return
       config.host = msg.ip
-      log('💾', '', config)
+      log('💾', '', config.host)
+      writeFile(configFile, stringify(config), 'utf8', err => {
+        if (err) console.error(err)
+      })
+      return
     }
   }
   log('⬅️', '', msg)
@@ -68,56 +84,17 @@ server.on('listening', function () {
 })
 
 server.bind(9761)
-server2.bind(9760)
-server3.bind(4101)
-
-server2.on('listening', function () {
-  const address = server.address()
-  log('2️⃣', '', address)
-})
-server2.on('message', function (msg) {
-  log('2️⃣', '', msg)
-})
-
-server3.on('listening', function () {
-  const address = server.address()
-  log('3️⃣', '', address)
-})
-server3.on('message', function (msg) {
-  log('3️⃣', '', msg)
-})
-
-const send = function (cmd, callback) {
-  const id = '' + messageId++
-  const message = Buffer.from(id + ',' + cmd, 'ascii')
-  log('➡️', '', '' + message)
-  client.send(message, 0, message.length, 9760, config.host || '255.255.255.255')
-  if (callback) listeners[id] = callback
-}
+// setInterval(() => send('@?W'),600000) // energy
 
 // send('!R1Fa') // register / firmware
-
-const urlencodedParser = bodyParser.urlencoded({ extended: false })
+send('!R1F*L')
 
 const app = express()
 
-const keyPath = path.resolve(__dirname, '..', 'config', 'keys')
+const keyPath = resolve(__dirname, '..', 'config', 'keys')
 exec(`mkdir -p ${keyPath}`, function (error, stderr) {
   if (error || stderr) console.error(`Error creating ${keyPath}`, error || stderr)
 })
-
-const authorised = function (key, callback) {
-  if (!key) return callback(new Error('missing key'))
-  return fs.access(path.join(keyPath, key), fs.F_OK, callback)
-}
-
-const accesslog = function (req, res, next) {
-  next()
-  const { key, _, ...query } = req.query
-  if (req.method === 'OPTIONS') return // not interesting logging
-  if (req.path === '/favicon.ico') return // not interesting logging
-  log(req.method, req.path, query)
-}
 
 const auth = function (req, res, next) {
   if (req.path === '/user') return next()
@@ -125,15 +102,6 @@ const auth = function (req, res, next) {
     if (error) return res.status(401).json({ error: 'not authorised, see paul' })
     next()
   })
-}
-
-const setHeaders = function (req, res, next) {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, PUT, POST, OPTIONS'
-  }
-  res.set(headers)
-  next()
 }
 
 app.all('*', accesslog, auth, setHeaders)
@@ -145,18 +113,50 @@ app.get('/config', function (req, res) {
 
 const operate = function (roomName, deviceName, status, callback) {
   roomName = ('' + roomName).replace(/\W/g, '')
-  deviceName = ('' + deviceName).replace(/\W/g, '')
-  status = ('' + (status || 'on')).replace(/\W/g, '')
   const rooms = config.room
   const room = rooms.find(room => room.name === roomName)
   if (!room) return callback(new Error('no such room'))
-  const r = rooms.findIndex(room => room.name === roomName) + 1
+  deviceName = ('' + deviceName).replace(/\W/g, '')
+  status = ('' + (status || 'on')).replace(/\W/g, '')
+  const f = convertStatus(status)
+  const r = rooms.findIndex(room => room.name === roomName) + 1 // @todo fix looking this up twice
+  if (deviceName === 'all') {
+    if (status === 'off') {
+      room.device.forEach(device => device.status = f)
+      // log('💾', '', room)
+      return send(`!R${r}Fa`, (err, response) => {
+        if (err) return callback(err)
+        writeFile(configFile, stringify(config), 'utf8', err => {
+          if (err) console.error(err)
+          callback(null, response)
+        })
+      })
+    }
+    const tasks = room.device.map(device => {
+      return callback => {
+        const randomTime = Math.floor(Math.random() * 200) + 100
+        setTimeout(() => {
+          operate(roomName, device.name, status, err => {
+            return callback(err)
+          })
+        }, randomTime)
+      }
+    })
+    return waterfall(tasks, error => callback(error))
+  }
   const device = room.device.find(device => device.name === deviceName)
   if (!device) return callback(new Error('no such device'))
   const d = room.device.findIndex(device => device.name === deviceName) + 1
-  const f = convertStatus(status)
   const code = '!R' + r + 'D' + d + f // + '|' + room.name + ' ' + device.name + '|' + status + ' via @pauly'
-  send(code, callback)
+  device.status = f
+  send(code, (err, response) => {
+    if (err) return calllback(err)
+    // log('💾', '', room)
+    writeFile(configFile, stringify(config), 'utf8', err => {
+      if (err) console.error(err)
+      callback(null, response)
+    })
+  })
 }
 
 app.put('/register', function (req, res) {
@@ -230,12 +230,12 @@ app.get('/energy', (req, res) => {
 app.post('/user', urlencodedParser, (req, res) => {
   const key = uuid.v4()
   const content = JSON.stringify(req.body)
-  fs.readdir(keyPath, (error, files) => {
+  readdir(keyPath, (error, files) => {
     if (error) return res.status(500).json({ error })
     // if we are the first key to be created, you get it free!
     // else create a . file that someone has to authorise
     const file = files.length === 0 ? key : '.' + key
-    fs.writeFile(path.join(keyPath, file), content, error => {
+    writeFile(join(keyPath, file), content, error => {
       if (error) return res.status(500).json({ error })
       res.json({ key, content })
     })

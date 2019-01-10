@@ -9,4 +9,3 @@ module.exports = winston.createLogger({
     new winston.transports.File({ filename })
   ]
 })
-

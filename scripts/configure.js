@@ -39,7 +39,7 @@ rl.question(`What is the ip address of your wifi link? (currently "${config.host
   rl.question(`What is the ip address of your calendar ics file? (currently "${config.calendar}" - ok to just hit enter here).`, calendar => {
     if (calendar !== '') config.calendar = calendar
     console.log(`Enter the name of a room and its devices, space separated. For example "lounge light socket tv". Enter a blank line to finish.`)
-    console.log(`If you want spaces in room or device name, wrap them in quotes. For example "\'living room' 'tv' 'table lamp\'"`)
+    console.log(`If you want spaces in room or device name, wrap them in quotes. For example "'living room' 'tv' 'table lamp'"`)
     console.log(`If you already have rooms and devices set up on another lightwaverf app then hit enter here, and "${update}" first.`)
     getRoomAndDevices(config.room, (err, rooms) => {
       if (!err) config.room = rooms
