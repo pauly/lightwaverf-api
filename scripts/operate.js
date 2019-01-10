@@ -11,9 +11,7 @@ let status = 'on'
 switch (args[0]) {
   case 'register':
   case 'energy':
-    break
   case 'sequence':
-    args.unshift('sequence')
     break
   default:
     if (args.length === 3) status = args.pop()
