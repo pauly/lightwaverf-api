@@ -10,9 +10,9 @@ This doesn't even use [the lightwaverf gem](https://github.com/pauly/lightwaverf
 
 Get a LightWaveRF wifi link http://amzn.to/V7yPPK and a remote socket http://amzn.to/RkukDo
 
-Run this code on a machine on your local network, add this to your crontab:
+Run this code on a machine on your local network, and
 ```
-@reboot bash -l -c 'cd /home/pi/lightwaverf-api && npm start' > /tmp/lightwaverf-api.out 2>&1
+npm run configure
 ```
 and restart your machine. On reboot the api will be running on port 8000 on this machine. Add a "key" filename in config/keys/ where this lives. For example
 ```
@@ -32,6 +32,16 @@ PUT http://localhost:8000/room/foo/all?key=SECRET&status=off # turns all decies
 GET http://localhost:8000/sequence?key=SECRET # lists sequences
 GET http://localhost:8000/sequence/foo?key=SECRET # lists devices controlled in sequence "foo"
 PUT http://localhost:8000/sequence/foo?key=SECRET # execute sequence "foo"
+```
+Some of those have a command line helper too;
+```
+npm run operate -- foo bar on # turns device "bar" in room "foo" on
+npm run operate -- foo bar off # turns device "bar" in room "foo" off
+npm run operate -- foo bar 50 # turns device "bar" in room "foo" to 50% brightness
+npm run operate -- foo all on # turns all devices in room "foo" on
+npm run operate -- foo all off # turns all decies in room "foo" off
+
+npm run operate -- sequence foo # execute sequence "foo"
 ```
 
 This code is unofficial and unaffiliated with http://www.lightwaverf.com, please let me know how you get on http://www.clarkeology.com/project/lightwaverf / @pauly
