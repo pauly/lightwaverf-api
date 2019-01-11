@@ -7,4 +7,3 @@ module.exports = (req, res, next) => {
   if (req.path === '/favicon.ico') return // not interesting logging
   log(req.method, req.path, query)
 }
-

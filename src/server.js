@@ -122,7 +122,9 @@ const operate = function (roomName, deviceName, status, callback) {
   const r = rooms.findIndex(room => room.name === roomName) + 1 // @todo fix looking this up twice
   if (deviceName === 'all') {
     if (status === 'off') {
-      room.device.forEach(device => device.status = f)
+      room.device.forEach(device => {
+        device.status = f
+      })
       // log('💾', '', room)
       return send(`!R${r}Fa`, (err, response) => {
         if (err) return callback(err)
@@ -150,7 +152,7 @@ const operate = function (roomName, deviceName, status, callback) {
   const code = '!R' + r + 'D' + d + f // + '|' + room.name + ' ' + device.name + '|' + status + ' via @pauly'
   device.status = f
   send(code, (err, response) => {
-    if (err) return calllback(err)
+    if (err) return callback(err)
     // log('💾', '', room)
     writeFile(configFile, stringify(config), 'utf8', err => {
       if (err) console.error(err)
