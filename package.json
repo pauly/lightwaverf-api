@@ -60,7 +60,7 @@
     "eslint-plugin-standard": "4.0.0",
     "event-stream": "4.0.1",
     "line-by-line": "0.1.6",
-    "mocha": "5.1.1",
+    "mocha": "5.2.0",
     "nodemon": "1.18.9",
     "nyc": "13.1.0",
     "sinon": "7.2.2",
