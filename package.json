@@ -61,7 +61,7 @@
     "event-stream": "4.0.1",
     "line-by-line": "0.1.6",
     "mocha": "5.1.1",
-    "nodemon": "1.18.9",
+    "nodemon": "1.19.4",
     "nyc": "13.1.0",
     "sinon": "7.2.2",
     "sinon-chai": "3.3.0"
